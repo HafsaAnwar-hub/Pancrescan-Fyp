@@ -9,6 +9,7 @@ const path = require('path');
 const Scan = require('../models/Scan');
 const User = require('../models/User');
 const requireAuth = require('../middleware/auth');
+const mongoose = require('mongoose');
 
 const router = express.Router();
 const uploadDirectory = process.env.VERCEL
@@ -28,6 +29,10 @@ router.post('/upload', requireAuth, upload.single('image'), async (req, res) => 
   const startTime = Date.now();
 
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ message: 'Database is not connected. Configure MONGODB_URI in Vercel.' });
+    }
+
     let prediction = 'negative';
     let tumor_probability = 0.05;
 
@@ -94,6 +99,10 @@ router.post('/upload', requireAuth, upload.single('image'), async (req, res) => 
 
 router.get('/history', requireAuth, async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ message: 'Database is not connected. Configure MONGODB_URI in Vercel.' });
+    }
+
     const scans = await Scan.find({ userId: req.userId }).populate('assignedDoctorId', 'name email').sort({ createdAt: -1 });
     res.json({ scans });
   } catch (err) {

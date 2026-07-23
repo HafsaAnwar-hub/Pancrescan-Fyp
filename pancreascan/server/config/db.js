@@ -1,18 +1,32 @@
 const mongoose = require('mongoose');
 
+mongoose.set('bufferCommands', false);
+let connectionPromise;
+
 async function connectDB() {
   if (!process.env.MONGODB_URI) {
-    console.warn('MONGODB_URI is not set. Continuing without MongoDB for local password reset flow.');
-    return;
+    return false;
   }
 
-  try {
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log('MongoDB connected');
-  } catch (err) {
-    console.warn('MongoDB connection error:', err.message);
-    console.warn('Continuing without MongoDB. Password reset will use temporary in-memory fallback.');
+  if (mongoose.connection.readyState === 1) {
+    return true;
   }
+
+  if (connectionPromise) {
+    return connectionPromise;
+  }
+
+  connectionPromise = mongoose.connect(process.env.MONGODB_URI, {
+    serverSelectionTimeoutMS: 5000
+  }).then(() => {
+    console.log('MongoDB connected');
+    return true;
+  }).catch((err) => {
+    connectionPromise = undefined;
+    throw err;
+  });
+
+  return connectionPromise;
 }
 
 module.exports = connectDB;

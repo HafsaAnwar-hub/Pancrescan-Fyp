@@ -10,7 +10,7 @@ const scanRoutes = require('./routes/scanRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
-connectDB();
+connectDB().catch((err) => console.warn('MongoDB connection unavailable:', err.message));
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
