@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "installCommand": "npm install --prefix pancreascan",
   "builds": [
     {
       "src": "pancreascan/api/index.js",
