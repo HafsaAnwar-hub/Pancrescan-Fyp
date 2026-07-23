@@ -3,13 +3,19 @@ const axios = require('axios');
 const FormData = require('form-data');
 const multer = require('multer');
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 
 const Scan = require('../models/Scan');
 const User = require('../models/User');
 const requireAuth = require('../middleware/auth');
 
 const router = express.Router();
-const upload = multer({ dest: 'uploads/' });
+const uploadDirectory = process.env.VERCEL
+  ? path.join(os.tmpdir(), 'pancreascan-uploads')
+  : path.join(__dirname, '..', '..', 'uploads');
+fs.mkdirSync(uploadDirectory, { recursive: true });
+const upload = multer({ dest: uploadDirectory });
 
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:5001/predict';
 
