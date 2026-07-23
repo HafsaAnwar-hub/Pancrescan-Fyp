@@ -33,33 +33,54 @@ app = Flask(__name__)
 CORS(app)
 
 MODEL_DIR = os.path.join(os.path.dirname(__file__), "model")
+model_state = {
+    "densenet_base": None,
+    "svm_model": None,
+    "scaler": None,
+    "woa_mask": None,
+    "outlier_detector": None,
+    "abdominal_threshold": None,
+}
 
-print("Loading DenseNet121 CNN backbone...")
-densenet_base = DenseNet121(
-    weights="imagenet", include_top=False, pooling="avg", input_shape=(224, 224, 3)
-)
 
-print("Loading trained SVM model, scaler, and WOA feature mask...")
-svm_model = joblib.load(os.path.join(MODEL_DIR, "final_model.pkl"))
-scaler = joblib.load(os.path.join(MODEL_DIR, "final_scaler.pkl"))
-woa_mask = np.load(os.path.join(MODEL_DIR, "final_woa_mask.npy"))
+def load_models():
+    if model_state["densenet_base"] is not None:
+        return
 
-print("Loading CT-scan validation (outlier detector)...")
-outlier_detector = joblib.load(os.path.join(MODEL_DIR, "outlier_detector.pkl"))
-with open(os.path.join(MODEL_DIR, "abdominal_threshold.json")) as f:
-    ABDOMINAL_THRESHOLD = json.load(f)["threshold"]
+    print("Loading DenseNet121 CNN backbone...")
+    model_state["densenet_base"] = DenseNet121(
+        weights="imagenet", include_top=False, pooling="avg", input_shape=(224, 224, 3)
+    )
 
-print("ML service ready.")
+    print("Loading trained SVM model, scaler, and WOA feature mask...")
+    model_state["svm_model"] = joblib.load(os.path.join(MODEL_DIR, "final_model.pkl"))
+    model_state["scaler"] = joblib.load(os.path.join(MODEL_DIR, "final_scaler.pkl"))
+    model_state["woa_mask"] = np.load(os.path.join(MODEL_DIR, "final_woa_mask.npy"))
+
+    print("Loading CT-scan validation (outlier detector)...")
+    model_state["outlier_detector"] = joblib.load(os.path.join(MODEL_DIR, "outlier_detector.pkl"))
+    with open(os.path.join(MODEL_DIR, "abdominal_threshold.json")) as f:
+        model_state["abdominal_threshold"] = json.load(f)["threshold"]
+
+    print("ML service ready.")
 
 
 def run_pipeline(img_path):
+    load_models()
+    densenet_base = model_state["densenet_base"]
+    svm_model = model_state["svm_model"]
+    scaler = model_state["scaler"]
+    woa_mask = model_state["woa_mask"]
+    outlier_detector = model_state["outlier_detector"]
+    abdominal_threshold = model_state["abdominal_threshold"]
+
     is_valid, message = is_likely_ct_scan(img_path)
     if not is_valid:
         raise ValueError("This doesn't look like a proper abdominal CT scan. Please upload a valid abdominal CT scan.")
 
     img = preprocess_image(img_path)
 
-    is_abdominal, score = is_abdominal_ct(img, densenet_base, densenet_preprocess, outlier_detector, ABDOMINAL_THRESHOLD)
+    is_abdominal, score = is_abdominal_ct(img, densenet_base, densenet_preprocess, outlier_detector, abdominal_threshold)
     if not is_abdominal:
         raise ValueError("This doesn't look like a proper abdominal CT scan. Please upload a valid abdominal CT scan.")
 
