@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <script>(function(){if(localStorage.getItem('ps_theme')==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PancreaScan Doctor Dashboard — manage callback inquiries and view patient diagnostic records.">
+  <title>Doctor Dashboard — PancreaScan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .list-container { display: grid; gap: 16px; }
+  </style>
+</head>
+
+<body>
+  <!-- ===== HEADER ===== -->
+  <header>
+    <div class="container nav">
+      <a href="index.html" class="brand">
+        <span class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 3H5a2 2 0 0 0-2 2v4M15 3h4a2 2 0 0 1 2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 21h4a2 2 0 0 0 2-2v-4" />
+          </svg>
+        </span>
+        PancreaScan
+      </a>
+      <ul class="nav-links" id="dynamic-nav-links"></ul>
+      <div class="nav-actions" id="nav-user-actions">
+        <button class="theme-toggle" type="button" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:flex"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN ===== -->
+  <main class="container" style="padding-top:40px;padding-bottom:80px;">
+
+    <!-- Welcome banner -->
+    <div class="dashboard-header fade-in">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;position:relative;z-index:1;">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div id="doctor-avatar-container" style="width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;color:white;overflow:hidden;border:2px solid rgba(255,255,255,0.4);flex-shrink:0;">
+            <span id="doctor-initials">D</span>
+          </div>
+          <div>
+            <div class="eyebrow" style="color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.2);margin-bottom:6px;">Oncology Portal</div>
+            <h2 id="doctor-welcome" style="font-size:26px;margin:0 0 4px 0;color:white;">Welcome, Doctor</h2>
+            <p style="color:rgba(255,255,255,0.6);font-size:13.5px;margin:0;">Clinician Dashboard · Diagnostic Records Access</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button id="open-profile-btn" class="btn btn-outline" style="font-size:13px;padding:10px 18px;background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);color:white;">
+            ✏️ Edit Profile
+          </button>
+          <div id="doctor-approval-status" style="position:relative;z-index:1;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats cards -->
+    <div class="stats-row fade-in-delay-1">
+      <div class="stat-card">
+        <h3>Total Patients</h3>
+        <div class="value" id="stat-total-patients">—</div>
+        <div class="trend">In system</div>
+      </div>
+      <div class="stat-card">
+        <h3>Callback Inquiries</h3>
+        <div class="value" id="stat-callbacks">—</div>
+        <div class="trend">Assigned to you</div>
+      </div>
+      <div class="stat-card">
+        <h3>Pending Callbacks</h3>
+        <div class="value" id="stat-pending" style="color:var(--warning);">—</div>
+        <div class="trend" style="color:var(--warning);">Awaiting response</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-row fade-in-delay-2">
+      <button class="tab-btn active" id="tab-callbacks-btn" onclick="switchTab('callbacks')">📞 Callback Inquiries</button>
+      <button class="tab-btn" id="tab-patients-btn" onclick="switchTab('patients')">👥 Patient Explorer</button>
+    </div>
+
+    <!-- Callback Inquiries View -->
+    <div id="view-callbacks" class="tab-view fade-in-delay-2">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+        <h3 style="margin:0;font-size:20px;">Callback Requests</h3>
+        <span id="callbacks-count-badge" style="font-size:13px;color:var(--gray-500);background:var(--surface-light);padding:5px 12px;border-radius:999px;border:1px solid var(--border);">Loading...</span>
+      </div>
+      <div class="list-container" id="callbacks-list-container">
+        <div style="padding:40px;text-align:center;">
+          <div class="skeleton" style="height:14px;width:50%;margin:0 auto 8px;"></div>
+          <div class="skeleton" style="height:14px;width:35%;margin:0 auto;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Patient Explorer View -->
+    <div id="view-patients" class="tab-view" style="display:none;">
+      <div class="patient-grid">
+        <div class="patient-list-sidebar">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h3 style="margin:0;font-size:16px;">Patient Directory</h3>
+            <span id="patients-count-badge" style="font-size:12px;color:var(--gray-500);background:var(--surface-alt);padding:3px 10px;border-radius:999px;border:1px solid var(--border);">0</span>
+          </div>
+          <div id="patients-list-sidebar-container">
+            <div style="padding:20px;text-align:center;">
+              <div class="skeleton" style="height:12px;width:70%;margin:0 auto 8px;"></div>
+              <div class="skeleton" style="height:12px;width:50%;margin:0 auto;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="patient-detail-panel" id="patient-detail-panel">
+          <div style="text-align:center;padding:80px 20px;color:var(--gray-400);">
+            <svg style="margin:0 auto 16px;opacity:0.3;" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            <h3 style="font-size:18px;margin-bottom:8px;">Select a patient to review</h3>
+            <p style="font-size:14px;line-height:1.65;max-width:360px;margin:0 auto;">Choose a patient from the list to view their profile, demographics, and complete CT scan results.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  <!-- Profile Edit Modal -->
+  <div id="profile-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:var(--surface);width:100%;max-width:480px;border-radius:var(--radius-lg);padding:28px;border:1px solid var(--border);box-shadow:0 20px 40px rgba(0,0,0,0.3);position:relative;">
+      <button id="close-profile-modal" type="button" style="position:absolute;top:18px;right:18px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--gray-500);">&times;</button>
+      <h3 style="margin:0 0 4px 0;font-size:20px;">Edit Profile Information</h3>
+      <p style="font-size:13.5px;color:var(--gray-500);margin:0 0 20px 0;">Update your clinician profile details, age/date of birth, and avatar image.</p>
+      
+      <form id="edit-profile-form">
+        <!-- Profile Picture Preview & Upload -->
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+          <div id="profile-preview-box" style="width:72px;height:72px;border-radius:50%;background:var(--surface-light);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:26px;color:var(--text);overflow:hidden;flex-shrink:0;">
+            <span id="profile-preview-initials">D</span>
+          </div>
+          <div>
+            <label for="profile-img-input" class="btn btn-outline" style="font-size:12.5px;padding:6px 14px;cursor:pointer;">
+              📷 Upload Profile Picture
+            </label>
+            <input type="file" id="profile-img-input" accept="image/*" style="display:none;">
+            <span style="font-size:11.5px;color:var(--gray-500);display:block;margin-top:4px;">Supports PNG, JPG, WEBP (Max 2MB)</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px;color:var(--text);">Full Name:</label>
+          <input type="text" id="edit-profile-name" required style="width:100%;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);font-size:14px;font-family:inherit;background:var(--surface-light);color:var(--text);">
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px;color:var(--text);">Date of Birth (Calculates Age):</label>
+          <input type="date" id="edit-profile-dob" style="width:100%;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);font-size:14px;font-family:inherit;background:var(--surface-light);color:var(--text);">
+          <span id="calculated-age-text" style="font-size:12px;color:var(--teal-dark);font-weight:600;display:block;margin-top:6px;"></span>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:10px;">
+          <button id="cancel-profile-btn" type="button" class="btn btn-outline" style="padding:10px 18px;font-size:13.5px;">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="padding:10px 20px;font-size:13.5px;">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="container">
+      <div class="footer-row" style="margin-bottom:20px;">
+        <div class="footer-brand">
+          <span class="logo-mark" style="width:32px;height:32px;background:linear-gradient(135deg,#0d9488,#0f766e);border-radius:10px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px;">
+              <path d="M9 3H5a2 2 0 0 0-2 2v4M15 3h4a2 2 0 0 1 2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 21h4a2 2 0 0 0 2-2v-4" />
+            </svg>
+          </span>
+          PancreaScan
+        </div>
+      </div>
+      <div class="footer-legal" style="text-align:left;border-top:1px solid rgba(255,255,255,0.06);padding-top:18px;">
+        © 2026 PancreaScan Medical Technologies, Inc. Authorized Clinician Access Portal.
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/doctor-dashboard.js"></script>
+</body>
+
+</html>

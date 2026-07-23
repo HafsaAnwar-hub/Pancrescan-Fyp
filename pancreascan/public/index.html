@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <script>(function(){if(localStorage.getItem('ps_theme')==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PancreaScan uses AI to detect pancreatic cancer from CT scans in under 90 seconds. FDA-cleared algorithm. HIPAA compliant. No referral needed.">
+  <title>PancreaScan — AI-Powered Pancreatic Cancer Detection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <!-- ================= HEADER ================= -->
+  <header>
+    <div class="container nav">
+      <a href="index.html" class="brand">
+        <span class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M9 3H5a2 2 0 0 0-2 2v4M15 3h4a2 2 0 0 1 2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 21h4a2 2 0 0 0 2-2v-4" />
+          </svg>
+        </span>
+        PancreaScan
+      </a>
+      <ul class="nav-links">
+        <li><a href="how-it-works.html">How it works</a></li>
+        <li><a href="features.html">Features</a></li>
+        <li><a href="reviews.html">Reviews</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" type="button" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:flex"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button>
+        <a href="login.html" class="link-btn">Log in</a>
+        <a href="signup.html" class="btn btn-primary">Get started</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="fade-in">
+        <span class="pill"><span class="dot"></span>AI-Powered Pancreatic Cancer Detection</span>
+        <h1>Early Detection<br><span class="accent">Saves Lives.</span></h1>
+        <p class="lead">Upload your CT scan and receive an AI-powered pancreatic tumor analysis in under 90
+          seconds. Clinically validated. HIPAA compliant. Radiologist reviewed.</p>
+        <div class="hero-ctas">
+          <a href="signup.html" class="btn btn-primary btn-lg">Start free scan analysis →</a>
+          <a href="login.html" class="btn btn-outline btn-lg">Log in to Dashboard</a>
+        </div>
+        <div class="trust-row">
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg>FDA cleared algorithm</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg>HIPAA compliant</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg>No referral needed</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg>Results in 90 seconds</span>
+        </div>
+      </div>
+
+      <div class="scan-card">
+        <div class="scan-card-head">
+          <span class="scan-status"><span class="blink"></span>ANALYZING...</span>
+          <span class="scan-id">PAT-2024-0847</span>
+        </div>
+        <div class="scan-viewport">
+          <span class="label tl">CT SCAN</span>
+          <span class="label tr">AXIAL</span>
+          <span class="label bl">HU: -30 → 100</span>
+          <span class="label br">5 cm</span>
+          <svg class="scan-rings" width="240" height="240" viewBox="0 0 240 240">
+            <circle cx="120" cy="120" r="110" fill="none" stroke="#1c3252" stroke-width="1" />
+            <circle cx="120" cy="120" r="80" fill="none" stroke="#1c3252" stroke-width="1" />
+            <path d="M70 115 Q 120 90 170 115" fill="none" stroke="#2c9c82" stroke-width="1.5" opacity="0.7" />
+            <path d="M75 128 Q 120 105 165 128" fill="none" stroke="#2c9c82" stroke-width="1.5" opacity="0.7" />
+            <ellipse cx="120" cy="150" rx="18" ry="22" fill="#3a4f6b" opacity="0.6" />
+            <line x1="120" y1="20" x2="120" y2="220" stroke="#233c5e" stroke-width="1" stroke-dasharray="4 4" />
+            <line x1="20" y1="120" x2="220" y2="120" stroke="#233c5e" stroke-width="1" stroke-dasharray="4 4" />
+          </svg>
+        </div>
+        <div class="scan-result">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M8 12l3 3 5-6" />
+          </svg>
+          <div>
+            <div class="title">No malignant findings</div>
+            <div class="meta">Confidence: 97.3% · Analyzed in 84s</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer>
+    <div class="container">
+      <div class="footer-row" style="margin-bottom: 24px;">
+        <div class="footer-brand">
+          <span class="logo-mark" style="width:32px;height:32px;background:linear-gradient(135deg,#0d9488,#0f766e);border-radius:10px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px;">
+              <path d="M9 3H5a2 2 0 0 0-2 2v4M15 3h4a2 2 0 0 1 2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 21h4a2 2 0 0 0 2-2v-4" />
+            </svg>
+          </span>
+          PancreaScan
+        </div>
+        <ul class="footer-links">
+          <li><a href="how-it-works.html">How it works</a></li>
+          <li><a href="features.html">Features</a></li>
+          <li><a href="reviews.html">Reviews</a></li>
+          <li><a href="login.html">Log in</a></li>
+        </ul>
+      </div>
+      <div class="footer-legal" style="text-align:left; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 20px;">
+        © 2026 PancreaScan Medical Technologies, Inc. FDA-cleared AI diagnostic support tool.
+        Not a substitute for professional medical advice, diagnosis, or treatment.
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+
+</html>
