@@ -80,6 +80,16 @@ def is_likely_ct_scan(img_path):
         color_diff = np.mean(np.abs(b - g)) + np.mean(np.abs(g - r)) + np.mean(np.abs(b - r))
         if color_diff > 45:
             reasons.append("image has high color variance")
+
+        # A real (grayscale) CT scan has virtually no colored pixels anywhere.
+        # A photo can average out low color-diff if most of the frame is neutral
+        # (walls/ceiling/floor) while small regions (signage, plants, skin) are
+        # strongly colored, so also check the per-pixel colorful fraction.
+        per_pixel_diff = np.abs(b - g) + np.abs(g - r) + np.abs(b - r)
+        colorful_ratio = (per_pixel_diff > 40).sum() / per_pixel_diff.size
+        if colorful_ratio > 0.02:
+            reasons.append("image contains colored regions inconsistent with a grayscale CT scan")
+
         gray = cv2.cvtColor(img_color, cv2.COLOR_BGR2GRAY)
     else:
         gray = img_color

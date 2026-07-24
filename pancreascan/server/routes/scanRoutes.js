@@ -16,11 +16,27 @@ const uploadDirectory = process.env.VERCEL
   ? path.join(os.tmpdir(), 'pancreascan-uploads')
   : path.join(__dirname, '..', '..', 'uploads');
 fs.mkdirSync(uploadDirectory, { recursive: true });
-const upload = multer({ dest: uploadDirectory });
+const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png']);
+const upload = multer({
+  dest: uploadDirectory,
+  fileFilter: (req, file, cb) => {
+    if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
+      return cb(new Error('Only JPG or PNG CT scan images are allowed.'));
+    }
+    cb(null, true);
+  },
+});
 
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:5001/predict';
 
-router.post('/upload', requireAuth, upload.single('image'), async (req, res) => {
+router.post('/upload', requireAuth, (req, res, next) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message || 'Invalid file upload.' });
+    }
+    next();
+  });
+}, async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No image file uploaded under field name "image"' });
   }
@@ -33,8 +49,8 @@ router.post('/upload', requireAuth, upload.single('image'), async (req, res) => 
       return res.status(503).json({ message: 'Database is not connected. Configure MONGODB_URI in Vercel.' });
     }
 
-    let prediction = 'negative';
-    let tumor_probability = 0.05;
+    let prediction;
+    let tumor_probability;
 
     try {
       const form = new FormData();
@@ -44,21 +60,17 @@ router.post('/upload', requireAuth, upload.single('image'), async (req, res) => 
         headers: form.getHeaders(),
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
-        timeout: 10000
+        timeout: 30000
       });
 
-      prediction = mlResponse.data.prediction || 'negative';
-      tumor_probability = mlResponse.data.tumor_probability !== undefined ? mlResponse.data.tumor_probability : 0.05;
+      prediction = mlResponse.data.prediction;
+      tumor_probability = mlResponse.data.tumor_probability;
     } catch (mlErr) {
       if (mlErr.response && mlErr.response.status === 400 && mlErr.response.data?.error) {
         return res.status(400).json({ message: mlErr.response.data.error });
       }
-      console.warn('ML Microservice (port 5001) unreachable or error. Using fallback analysis system:', mlErr.message);
-      // Fallback prediction based on image file analysis
-      const lowerName = req.file.originalname.toLowerCase();
-      const isTumorPattern = lowerName.includes('tumor') || lowerName.includes('pos') || lowerName.includes('lesion');
-      prediction = isTumorPattern ? 'positive' : 'negative';
-      tumor_probability = isTumorPattern ? 0.92 : 0.04;
+      console.error('ML microservice unreachable or error:', mlErr.message);
+      return res.status(503).json({ message: 'Scan analysis service is unavailable right now. Please try again shortly.' });
     }
 
     const analysisTime = Math.max(1, Math.round((Date.now() - startTime) / 1000));

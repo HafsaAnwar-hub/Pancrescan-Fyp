@@ -92,6 +92,15 @@
     if (!user || user.role !== 'doctor') { window.location.href = 'login.html'; return; }
   } else if (filename.includes('admin-dashboard')) {
     if (!user || user.role !== 'admin') { window.location.href = 'login.html'; return; }
+  } else if (filename === 'login.html' || filename === 'signup.html') {
+    // Already logged in — don't show the login/signup form again.
+    if (user) {
+      const dest = user.role === 'doctor' ? 'doctor-dashboard.html'
+        : user.role === 'admin' ? 'admin-dashboard.html'
+        : 'dashboard.html';
+      window.location.href = dest;
+      return;
+    }
   }
 
   // Refresh user data from server to keep name/role current
